@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wearwidget-provider
+    label="@string/widget_label"
+    description="@string/widget_description"
+    preferredType="LARGE">
+    <container type="LARGE" previewImage="@drawable/tile_preview" />
+    <container type="SMALL" previewImage="@drawable/tile_preview" />
+</wearwidget-provider>

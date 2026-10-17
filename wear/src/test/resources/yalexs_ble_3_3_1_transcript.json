@@ -1,0 +1,80 @@
+{
+  "source": "yalexs-ble 3.3.1, unmodified, against tools/gen_vectors.py SimulatedLock",
+  "dummy_key": "00112233445566778899aabbccddeeff",
+  "slot": 3,
+  "mobile_random": "a0a1a2a3a4a5a6a7a8a9aaabacadaeaf",
+  "status_before_unlock": "LOCKED",
+  "events": [
+    {
+      "type": "enable",
+      "channel": "SECURE"
+    },
+    {
+      "type": "write",
+      "channel": "SECURE",
+      "data": "31efd08133dc76da8ec0a9e0332ab2110f03"
+    },
+    {
+      "type": "notify",
+      "channel": "SECURE",
+      "data": "adda220b49b22a238a206a822b6541170f03"
+    },
+    {
+      "type": "write",
+      "channel": "SECURE",
+      "data": "462c7506c9abeb5881c348833b938c5b0f03"
+    },
+    {
+      "type": "notify",
+      "channel": "SECURE",
+      "data": "a3c3658db5f453761e213fb019ad2e2b0f03"
+    },
+    {
+      "type": "enable",
+      "channel": "SESSION"
+    },
+    {
+      "type": "write",
+      "channel": "SESSION",
+      "data": "d9861310dbf1467a59669ef0b529bd2c0200"
+    },
+    {
+      "type": "notify",
+      "channel": "SESSION",
+      "data": "760553bb00876ada99458032633bd2280000"
+    },
+    {
+      "type": "notify",
+      "channel": "SESSION",
+      "data": "35651a1f2e1f8ad3b2f75ff223dc7cd30000"
+    },
+    {
+      "type": "write",
+      "channel": "SESSION",
+      "data": "fe53c95b5fd807327f85c087560fd6930200"
+    },
+    {
+      "type": "notify",
+      "channel": "SESSION",
+      "data": "ba1a6cbcdea5d2528dabb4b397fbd9e60000"
+    },
+    {
+      "type": "disable",
+      "channel": "SESSION"
+    },
+    {
+      "type": "write",
+      "channel": "SECURE",
+      "data": "a6241cb0b6bba8f9f5d5d8f13b5ed3340f00"
+    },
+    {
+      "type": "notify",
+      "channel": "SECURE",
+      "data": "c8da176cfc040e445ca9b7c3802cd4050f03"
+    },
+    {
+      "type": "disable",
+      "channel": "SECURE"
+    }
+  ]
+}

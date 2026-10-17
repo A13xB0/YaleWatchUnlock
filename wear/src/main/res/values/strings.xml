@@ -5,7 +5,7 @@
     <string name="tile_label">Unlock front door</string>
     <string name="tile_set_up">Set up</string>
     <string name="widget_label">Hold to unlock</string>
-    <string name="widget_description">Hold for 3 seconds, then release to unlock the front door.</string>
+    <string name="widget_description">Hold for a second, then release to unlock the front door.</string>
     <string name="widget_set_up">Open the app to set up</string>
     <string name="widget_keep_holding">Keep holding</string>
     <string name="widget_release">Release</string>
@@ -20,8 +20,8 @@
     <string name="unlock">Unlock</string>
     <string name="try_again">Try again</string>
     <string name="hold">Hold</string>
-    <string name="hold_to_unlock">Hold for 3 seconds to unlock</string>
-    <string name="hold_hint">Hold 3 s, then release</string>
+    <string name="hold_to_unlock">Hold for 1 second to unlock</string>
+    <string name="hold_hint">Hold 1 s, then release</string>
     <string name="unlocking_short">Unlocking</string>
     <string name="more">More</string>
     <string name="settings">Settings</string>

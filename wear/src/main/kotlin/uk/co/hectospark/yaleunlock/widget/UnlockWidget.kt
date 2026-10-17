@@ -43,7 +43,7 @@ import uk.co.hectospark.yaleunlock.unlock.UnlockService
  * Wear OS widget: one big button you hold to unlock.
  *
  * Touch down, up and cancel are forwarded to [UnlockService] as PendingIntents.
- * The service connects while the finger is down, buzzes at 3 s, and unlocks on
+ * The service connects while the finger is down, buzzes at 1 s, and unlocks on
  * release only if the hold lasted at least that long. The widget itself holds
  * no logic, so a missed event can only ever mean "nothing happens".
  */

@@ -201,7 +201,8 @@ class UnlockService : Service() {
         holdPrepare = null
         holdTimers?.cancel()
         val held = SystemClock.elapsedRealtime() - holdStartedAt
-        val commit = released && held in HOLD_MS..MAX_HOLD_MS
+        // Small tolerance: start and end reach the service with slightly different delays.
+        val commit = released && held in (HOLD_MS - HOLD_TOLERANCE_MS)..MAX_HOLD_MS
         Log.i(TAG, "Hold ended after ${held}ms, commit=$commit")
 
         if (!commit) prepare.cancel()
@@ -313,10 +314,21 @@ class UnlockService : Service() {
         const val ACTION_HOLD_CANCEL = "uk.co.hectospark.yaleunlock.HOLD_CANCEL"
 
         /** How long the widget must be held before release unlocks. */
-        const val HOLD_MS = 3_000L
+        const val HOLD_MS = 1_000L
+
+        private const val HOLD_TOLERANCE_MS = 150L
 
         /** A hold this long without a release is treated as lost and abandoned. */
         const val MAX_HOLD_MS = 15_000L
+
+        /** Sends a hold event from the app's own hold screen (foreground, so the start is allowed). */
+        fun sendHold(context: Context, action: String) {
+            try {
+                context.startForegroundService(Intent(context, UnlockService::class.java).setAction(action))
+            } catch (e: IllegalStateException) {
+                Log.w(TAG, "Hold event refused: ${e.javaClass.simpleName}")
+            }
+        }
 
         /** PendingIntent the widget fires for a hold event; the service itself is not exported. */
         fun holdIntent(context: Context, action: String): PendingIntent = PendingIntent.getForegroundService(

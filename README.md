@@ -8,7 +8,7 @@ It's a personal project and it's set up for my door, but if you've got a Yale/Au
 
 ## What it does
 
-- **Widget** (on watches that support Wear OS widgets, like the Pixel Watch 4): one big button. Hold it, it buzzes at 3 seconds, let go and the door unlocks. Let go early and nothing happens.
+- **Widget** (on watches that support Wear OS widgets, like the Pixel Watch 4): one big button. Hold it for a second until it buzzes, let go and the door unlocks. Let go early and nothing happens.
 - **Tile**: tap it to open a full-screen hold-to-unlock button.
 - **App**: a plain Unlock button, plus setup and settings.
 

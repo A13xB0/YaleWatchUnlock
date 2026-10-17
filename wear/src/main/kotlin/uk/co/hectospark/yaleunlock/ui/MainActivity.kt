@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity() {
     /**
      * A launch carrying the tile's per-install token opens the hold-to-unlock
      * screen; any other launch opens the normal app. Neither unlocks by itself:
-     * the hold screen still needs a deliberate 3-second press.
+     * the hold screen still needs a deliberate one-second press.
      */
     private fun handleLaunch(intent: Intent?) {
         val token = intent?.getStringExtra(EXTRA_LAUNCH_TOKEN)

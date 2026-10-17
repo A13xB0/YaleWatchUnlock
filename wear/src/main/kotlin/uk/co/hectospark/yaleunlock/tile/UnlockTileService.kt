@@ -28,7 +28,7 @@ import uk.co.hectospark.yaleunlock.ui.MainActivity
  * MainActivity must be exported for the tile renderer to start it, which
  * means any app on the watch could start it too. Only a launch carrying this
  * token opens straight into the hold-to-unlock screen; even then nothing
- * happens without a deliberate 3-second hold.
+ * happens without a deliberate one-second hold.
  */
 object LaunchToken {
     private const val PREFS = "launch_token"

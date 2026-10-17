@@ -26,6 +26,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,9 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -72,6 +71,7 @@ import uk.co.hectospark.yaleunlock.unlock.Failure
 import uk.co.hectospark.yaleunlock.unlock.Stage
 import uk.co.hectospark.yaleunlock.unlock.UnlockController
 import uk.co.hectospark.yaleunlock.unlock.UnlockResult
+import uk.co.hectospark.yaleunlock.unlock.UnlockService
 
 private val Accent = Color(0xFFFFC94D)
 private val OnAccent = Color(0xFF101820)
@@ -97,7 +97,11 @@ fun App(
 ) {
     MaterialTheme {
         if (holdMode) {
-            HoldToUnlockScreen(onUnlock = onUnlock, onMore = onExitHold)
+            HoldToUnlockScreen(
+                permissionsGranted = permissionsGranted,
+                onNeedPermission = onRequestPermissions,
+                onMore = onExitHold,
+            )
             return@MaterialTheme
         }
         AppScaffold {
@@ -498,26 +502,33 @@ private fun SettingsScreen(onReplace: () -> Unit, onDeleted: () -> Unit) {
     }
 }
 
-/** How long the button must be held before the unlock starts. */
-private const val HOLD_MS = 3_000
+/** How long the button must be held before the unlock starts; shared with the widget. */
+private const val HOLD_MS = UnlockService.HOLD_MS.toInt()
 
 /**
- * Full-screen hold-to-unlock, opened from the tile. A ring fills while the
- * button is held; releasing (or swiping) before [HOLD_MS] cancels and rewinds.
- * Only a completed hold starts the unlock, so a brushed tile or stray tap
- * cannot operate the door.
+ * Full-screen hold-to-unlock, opened from the tile.
+ *
+ * Finger down starts connecting straight away (the same service hold path
+ * the widget uses), so the lock is usually ready by the time the ring fills.
+ * At [HOLD_MS] the unlock is committed while still held; releasing or
+ * swiping earlier cancels and drops the connection without sending anything.
+ * Committing on time rather than on release is safe here because these touch
+ * events are delivered in-process and cannot go missing.
  */
 @Composable
-private fun HoldToUnlockScreen(onUnlock: () -> Unit, onMore: () -> Unit) {
+private fun HoldToUnlockScreen(permissionsGranted: Boolean, onNeedPermission: () -> Unit, onMore: () -> Unit) {
+    val context = LocalContext.current
     val state by UnlockController.state.collectAsStateWithLifecycle()
     val working = UnlockController.busy
+    // Read through State so the gesture handler is never restarted mid-press.
+    val busyNow by rememberUpdatedState(working)
+    val canHold by rememberUpdatedState(permissionsGranted)
     val progress = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
-    val haptics = LocalHapticFeedback.current
 
     // Rewind the ring once a run has finished, leaving the result on screen.
     LaunchedEffect(state) {
-        if (state !is UnlockController.State.Working && progress.value > 0f) {
+        if (state is UnlockController.State.Finished && progress.value > 0f) {
             progress.animateTo(0f, tween(400))
         }
     }
@@ -539,22 +550,28 @@ private fun HoldToUnlockScreen(onUnlock: () -> Unit, onMore: () -> Unit) {
                     .clip(CircleShape)
                     .background(if (working) Accent.copy(alpha = 0.45f) else Accent)
                     .semantics { contentDescription = holdLabel }
-                    .pointerInput(working) {
+                    .pointerInput(Unit) {
                         detectTapGestures(
                             onPress = {
-                                if (working) return@detectTapGestures
+                                if (busyNow) return@detectTapGestures
+                                if (!canHold) {
+                                    onNeedPermission()
+                                    return@detectTapGestures
+                                }
                                 UnlockController.clear()
-                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                var fill: Job? = null
-                                fill = scope.launch {
+                                // Start connecting now; the service ticks on start and buzzes at HOLD_MS.
+                                UnlockService.sendHold(context, UnlockService.ACTION_HOLD_START)
+                                var committed = false
+                                val fill: Job = scope.launch {
                                     progress.snapTo(0f)
                                     progress.animateTo(1f, tween(HOLD_MS, easing = LinearEasing))
-                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onUnlock()
+                                    committed = true
+                                    UnlockService.sendHold(context, UnlockService.ACTION_HOLD_END)
                                 }
                                 tryAwaitRelease()
-                                if (progress.value < 1f) {
+                                if (!committed) {
                                     fill.cancel()
+                                    UnlockService.sendHold(context, UnlockService.ACTION_HOLD_CANCEL)
                                     scope.launch { progress.animateTo(0f, tween(250)) }
                                 }
                             },
